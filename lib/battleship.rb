@@ -8,13 +8,19 @@ class Battleship
     
   end
   
+  def self.welcome_message
+    puts "Welcome to BATTLESHIP\n\nWould you like to (p)lay, read the (i)nstructions, or (q)uit?"
+    input = gets.chomp 
+    game_initiation(input)
+  end
+  
   def self.game_initiation(input)
-    # use case statement?
-    if input == "p" || input == "play"
+    case input
+    when "p", "play"
       start_game
-    elsif input == "i" || input == "instructions"
+    when "i", "instructions"
       instructions
-    elsif input == "q" || input == "quit"
+    when "q", "quit"
       puts "Thanks for playing!"
     else 
       puts "Please enter a valid choice"
@@ -24,18 +30,18 @@ class Battleship
   end
   
   def self.start_game
-    @computer_two_unit_ship = validate_two_unit_ships
-    @computer_three_unit_ship = validate_three_unit_ships(@computer_two_unit_ship)
+    @computer_two_unit_ship = validate_two_unit_computer_ships
+    @computer_three_unit_ship = validate_three_unit_computer_ships(@computer_two_unit_ship)
     puts "I have laid out my ships on the grid.\nYou now need to layout your two ships."\
          "\nThe first is two units long and the second is three units long."\
          "\nThe grid has A1 at the top left and D4 at the bottom right."\
     
           "\n\nEnter the squares for the two-unit ship:"
-    input = gets.chomp 
-    @player_two_unit_ship = check_valid_user_coordinates(input)
+    user_input = gets.chomp 
+    @player_two_unit_ship = check_valid_user_coordinates(user_input)
     puts "Great job! Now enter the squares for the three-unit ship"
-    input = gets.chomp 
-    @player_three_unit_ship = check_user_three_unit_coordinates(input)
+    user_input = gets.chomp 
+    @player_three_unit_ship = validate_three_unit_user_ships(user_input)
   end
   
   def self.instructions
@@ -46,70 +52,66 @@ class Battleship
     welcome_message
   end
   
-  def self.welcome_message
-    puts "Welcome to BATTLESHIP\n\nWould you like to (p)lay, read the (i)nstructions, or (q)uit?"
-    input = gets.chomp 
-    game_initiation(input)
-  end
-  
-  def self.validate_two_unit_ships
+  def self.validate_two_unit_computer_ships
     possible_coordinates = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4", "C1", "C2", "C3", "C4", "D1", "D2", "D3", "D4"]
     ship = possible_coordinates.sample(2)
     if Rules.validate_two_unit(ship)
       ship
     else
-      validate_two_unit_ships 
+      validate_two_unit_computer_ships 
     end
   end
   
-  def self.validate_three_unit_ships(two_unit_ship)
+  def self.validate_three_unit_computer_ships(two_unit_ship)
     possible_coordinates = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4", "C1", "C2", "C3", "C4", "D1", "D2", "D3", "D4"]
     three_unit_possible_coordinates = possible_coordinates - two_unit_ship 
     ship = three_unit_possible_coordinates.sample(3)
     
-    if Rules.validate_three_unit(ship)
+    if Rules.separate_letters_and_numbers(ship)
       ship
     else
-      validate_three_unit_ships(two_unit_ship) 
+      validate_three_unit_computer_ships(two_unit_ship) 
     end
   end
   
-  def self.check_valid_user_coordinates(input)
-    new_input = input.split(" ")
-    if new_input.count == 2
-      check_user_two_unit_coordinates(new_input)
+  def self.check_valid_user_coordinates(user_input)
+    new_user_input = user_input.split(" ")
+    if new_user_input.count == 2
+      validate_two_unit_user_ships(new_user_input)
     else
-      check_user_three_unit_coordinates(input)
+      validate_three_unit_user_ships(new_user_input)
     end
   end
   
-  def self.check_user_two_unit_coordinates(new_input)
-    if !Rules.letters_good_two_unit?(new_input[0][0], new_input[1][0])
+  def self.validate_two_unit_user_ships(new_user_input)
+    if !Rules.letters_good_two_unit?(new_user_input[0][0], new_user_input[1][0])
       puts "The letters entered are not valid, please try again"
-      input = gets.chomp
-      check_valid_user_coordinates(input)
-    elsif !Rules.numbers_good_two_unit?(new_input[0][1], new_input[1][1])
+      user_input = gets.chomp
+      check_valid_user_coordinates(user_input)
+    elsif !Rules.numbers_good_two_unit?(new_user_input[0][1], new_user_input[1][1])
       puts "The numbers entered are not valid, please try again"
       input = gets.chomp
-      check_valid_user_coordinates(input)
+      check_valid_user_coordinates(user_input)
     else 
-      @player_two_unit_ship = new_input 
+      @player_two_unit_ship = new_user_input 
     end
   end
   
-  def self.check_user_three_unit_coordinates(input)
-    new_input = input.split(" ")
-    if !(new_input & @player_two_unit_ship).empty?
+  def self.validate_three_unit_user_ships(user_input)
+    new_user_input = user_input.split(" ")
+    if !(new_user_input & @player_two_unit_ship).empty?
       puts "Please try again, this ship overlaps with your 2 unit ship."
-      input = gets.chomp
-      check_user_three_unit_coordinates(input)
-    elsif Rules.validate_three_unit(new_input)
+      user_input = gets.chomp
+      validate_three_unit_user_ships(user_input)
+    elsif Rules.separate_letters_and_numbers(new_user_input) == false
+      binding.pry
+      puts "Please try again, you have entered the numbers or letters incorrectly."
+      user_input = gets.chomp
+      validate_three_unit_user_ships(user_input)
+    elsif Rules.separate_letters_and_numbers(new_user_input)
       puts "GREAT! WE HAVE OUR SHIPS!"
-      new_input 
-    else
-      check_valid_user_coordinates(input)
+      new_user_input 
     end
-    
   end
 end
 
