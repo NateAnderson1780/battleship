@@ -26,20 +26,23 @@ class Battleship
   def self.start_game
     @computer_two_unit_ship = validate_two_unit_ships
     @computer_three_unit_ship = validate_three_unit_ships(@computer_two_unit_ship)
-    binding.pry
-    puts "I have laid out my ships on the grid.\nYou now need to layout your two ships.
-The first is two units long and the second is three units long.
-The grid has A1 at the top left and D4 at the bottom right.
+    puts "I have laid out my ships on the grid.\nYou now need to layout your two ships."\
+         "\nThe first is two units long and the second is three units long."\
+         "\nThe grid has A1 at the top left and D4 at the bottom right."\
     
-Enter the squares for the two-unit ship:"
+          "\n\nEnter the squares for the two-unit ship:"
     input = gets.chomp 
+    @player_two_unit_ship = check_valid_user_coordinates(input)
+    puts "Great job! Now enter the squares for the three-unit ship"
+    input = gets.chomp 
+    @player_three_unit_ship = check_user_three_unit_coordinates(input)
   end
   
   def self.instructions
-    puts "The game Battleship is played with two players who each have a 2 unit ship
-    and a 3 unit ship.  Each player takes turns choosing coordinates to see if they have hit
-    the opponent's ship.  The game is played until one player hits all points on an opponent
-    player's ship."
+    puts "The game Battleship is played with two players who each have a 2 unit ship "\
+         "and a 3 unit ship.  \nEach player takes turns choosing coordinates to see if they have hit "\
+         "the opponent's ship.  \nThe game is played until one player hits all points on an opponent "\
+         "player's ship."
     welcome_message
   end
   
@@ -69,6 +72,44 @@ Enter the squares for the two-unit ship:"
     else
       validate_three_unit_ships(two_unit_ship) 
     end
+  end
+  
+  def self.check_valid_user_coordinates(input)
+    new_input = input.split(" ")
+    if new_input.count == 2
+      check_user_two_unit_coordinates(new_input)
+    else
+      check_user_three_unit_coordinates(input)
+    end
+  end
+  
+  def self.check_user_two_unit_coordinates(new_input)
+    if !Rules.letters_good_two_unit?(new_input[0][0], new_input[1][0])
+      puts "The letters entered are not valid, please try again"
+      input = gets.chomp
+      check_valid_user_coordinates(input)
+    elsif !Rules.numbers_good_two_unit?(new_input[0][1], new_input[1][1])
+      puts "The numbers entered are not valid, please try again"
+      input = gets.chomp
+      check_valid_user_coordinates(input)
+    else 
+      @player_two_unit_ship = new_input 
+    end
+  end
+  
+  def self.check_user_three_unit_coordinates(input)
+    new_input = input.split(" ")
+    if !(new_input & @player_two_unit_ship).empty?
+      puts "Please try again, this ship overlaps with your 2 unit ship."
+      input = gets.chomp
+      check_user_three_unit_coordinates(input)
+    elsif Rules.validate_three_unit(new_input)
+      puts "GREAT! WE HAVE OUR SHIPS!"
+      new_input 
+    else
+      check_valid_user_coordinates(input)
+    end
+    
   end
 end
 
