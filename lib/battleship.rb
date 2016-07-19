@@ -53,13 +53,13 @@ class Battleship
     welcome_message
   end
   
-  def self.validate_two_unit_ships
+  def self.build_computer_two_unit_ships
     possible_coordinates = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4", "C1", "C2", "C3", "C4", "D1", "D2", "D3", "D4"]
     ship = possible_coordinates.sample(2)
     if Rules.validate_two_unit(ship)
       ship
     else
-      validate_two_unit_ships 
+      build_computer_two_unit_ships 
     end
   end
   
@@ -114,6 +114,7 @@ class Battleship
   end
   
   Battleship.welcome_message
+  binding.pry
   new_game = Game.new(@computer_two_unit_ship, @computer_three_unit_ship, @player_two_unit_ship, @player_three_unit_ship)
   new_game.play_the_game
 end

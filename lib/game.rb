@@ -9,18 +9,52 @@ class Game
     @computer_three_unit_ship = computer_three_unit_ship
     @player_two_unit_ship     = player_two_unit_ship
     @player_three_unit_ship   = player_three_unit_ship
-    @board = Board.new 
+    @player_board = Board.new 
+    @computer_board = Board.new
   end
 
   def play_the_game
-    puts @board.table 
-    binding.pry
+    player_shot_sequence
+    computer_shot_sequence
+  end
+  
+  def player_shot_sequence
+    puts @player_board.table 
     puts "Which position would you like to fire at?"
     input = gets.chomp
     validate_coordinate(input)
     update_guesses(input)
     check_if_computer_hit?(input)
     hit_enter_to_end_turn
+  end
+  
+  def computer_shot_sequence
+    computer_shot = @possible_coordinates.sample 
+  end
+  
+  def validate_coordinate(input)
+    case 
+    when @possible_coordinates.include?(input)
+      validate_unique_guess(input)
+    else 
+      binding.pry
+      puts "Please try again, that is not a valid coordinate."
+      play_the_game
+    end 
+  end
+  
+  def validate_unique_guess(input)
+    case input
+    when @player_guesses.include?(input)
+      puts "Please try again, you have guessed that previously."
+      play_the_game
+    else
+      true 
+    end
+  end
+  
+  def update_guesses(input)
+    @player_guesses << input 
   end
   
   def check_if_computer_hit?(input)
@@ -45,30 +79,5 @@ class Game
   
   def update_board(input)
     
-  end
-  
-  def update_guesses(input)
-    @player_guesses << input 
-  end
-  
-  def validate_coordinate(input)
-    case 
-    when @possible_coordinates.include?(input)
-      validate_unique_guess(input)
-    else 
-      binding.pry
-      puts "Please try again, that is not a valid coordinate."
-      play_the_game
-    end 
-  end
-  
-  def validate_unique_guess(input)
-    case input
-    when @player_guesses.include?(input)
-      puts "Please try again, you have guessed that previously."
-      play_the_game
-    else
-      true 
-    end
   end
 end
