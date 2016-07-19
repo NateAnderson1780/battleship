@@ -8,6 +8,12 @@ class Battleship
     
   end
   
+  def self.welcome_message
+    puts "Welcome to BATTLESHIP\n\nWould you like to (p)lay, read the (i)nstructions, or (q)uit?"
+    input = gets.chomp 
+    game_initiation(input)
+  end
+  
   def self.game_initiation(input)
     case input
     when "p", "play"
@@ -47,12 +53,6 @@ class Battleship
     welcome_message
   end
   
-  def self.welcome_message
-    puts "Welcome to BATTLESHIP\n\nWould you like to (p)lay, read the (i)nstructions, or (q)uit?"
-    input = gets.chomp 
-    game_initiation(input)
-  end
-  
   def self.validate_two_unit_ships
     possible_coordinates = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4", "C1", "C2", "C3", "C4", "D1", "D2", "D3", "D4"]
     ship = possible_coordinates.sample(2)
@@ -67,7 +67,6 @@ class Battleship
     possible_coordinates = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4", "C1", "C2", "C3", "C4", "D1", "D2", "D3", "D4"]
     three_unit_possible_coordinates = possible_coordinates - two_unit_ship 
     ship = three_unit_possible_coordinates.sample(3)
-    
     if Rules.validate_three_unit(ship)
       ship
     else
