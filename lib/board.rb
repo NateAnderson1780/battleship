@@ -1,8 +1,9 @@
 require 'terminal-table'
 
 class Board
-  def initialize(ship)
-    @ship = ship
+  attr_accessor :table 
+  
+  def initialize
     @table = Terminal::Table.new do |t|
       t << [".", "1", "2", "3", "4"]
       t << :separator

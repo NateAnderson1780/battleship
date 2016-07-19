@@ -1,4 +1,4 @@
-require './lib/ship_layout'
+require './lib/game'
 require './lib/rules'
 require './lib/board'
 require 'pry'
@@ -9,12 +9,12 @@ class Battleship
   end
   
   def self.game_initiation(input)
-    # use case statement?
-    if input == "p" || input == "play"
+    case input
+    when "p", "play"
       start_game
-    elsif input == "i" || input == "instructions"
+    when "i", "instructions"
       instructions
-    elsif input == "q" || input == "quit"
+    when "q", "quit"
       puts "Thanks for playing!"
     else 
       puts "Please enter a valid choice"
@@ -36,6 +36,7 @@ class Battleship
     puts "Great job! Now enter the squares for the three-unit ship"
     input = gets.chomp 
     @player_three_unit_ship = check_user_three_unit_coordinates(input)
+    
   end
   
   def self.instructions
@@ -85,11 +86,11 @@ class Battleship
   
   def self.check_user_two_unit_coordinates(new_input)
     if !Rules.letters_good_two_unit?(new_input[0][0], new_input[1][0])
-      puts "The letters entered are not valid, please try again"
+      puts "Please try again, the letters entered are not valid."
       input = gets.chomp
       check_valid_user_coordinates(input)
     elsif !Rules.numbers_good_two_unit?(new_input[0][1], new_input[1][1])
-      puts "The numbers entered are not valid, please try again"
+      puts "Please try again, the numbers entered are not valid."
       input = gets.chomp
       check_valid_user_coordinates(input)
     else 
@@ -106,13 +107,17 @@ class Battleship
     elsif Rules.validate_three_unit(new_input)
       puts "GREAT! WE HAVE OUR SHIPS!"
       new_input 
-    else
-      check_valid_user_coordinates(input)
+    elsif !Rules.validate_three_unit(new_input)
+      puts "Please try again, numbers and letter entered are not valid."
+      input = gets.chomp
+      check_user_three_unit_coordinates(input)
     end
-    
   end
+  
+  Battleship.welcome_message
+  new_game = Game.new(@computer_two_unit_ship, @computer_three_unit_ship, @player_two_unit_ship, @player_three_unit_ship)
+  new_game.play_the_game
 end
 
-Battleship.welcome_message
 
 
