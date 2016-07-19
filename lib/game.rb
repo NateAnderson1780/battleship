@@ -1,4 +1,5 @@
 require './lib/board'
+require './lib/ship_placement'
 
 class Game
   def initialize(computer_two_unit_ship, computer_three_unit_ship, player_two_unit_ship, player_three_unit_ship)
@@ -9,8 +10,8 @@ class Game
     @computer_three_unit_ship = computer_three_unit_ship
     @player_two_unit_ship     = player_two_unit_ship
     @player_three_unit_ship   = player_three_unit_ship
-    @player_board = Board.new 
-    @computer_board = Board.new
+    @player_board             = Board.new 
+    @computer_board           = Board.new
   end
 
   def play_the_game
@@ -37,7 +38,6 @@ class Game
     when @possible_coordinates.include?(input)
       validate_unique_guess(input)
     else 
-      binding.pry
       puts "Please try again, that is not a valid coordinate."
       play_the_game
     end 
@@ -58,13 +58,30 @@ class Game
   end
   
   def check_if_computer_hit?(input)
-    if @computer_two_unit_ship.include?(input) || @computer_three_unit_ship.include?(input)
-      puts "HIT!"
+    binding.pry
+    if @computer_two_unit_ship.include?(input) 
+      puts "YOU HAVE HIT THE 2 UNIT SHIP!!"
       # update_board(input, "H")
+      check_if_ship_sunk
+    elsif  @computer_three_unit_ship.include?(input)
+      puts "YOU HAVE HIT THE 3 UNIT SHIP!!!"
+      # update_board(input, "H")
+      check_if_ship_sunk
     else
       puts "Bummer, that one's a miss."
       # update_board(input, "M")
     end  
+  end
+  
+  def check_if_ship_sunk
+    case 
+    when ((@computer_two_unit_ship + @computer_three_unit_ship) - @player_guesses).empty?
+      # enter END GAME SEQUENCE
+    when (@computer_two_unit_ship - @player_guesses).empty?
+      puts "THE 2 UNIT SHIP IS NOW SUNK!!"
+    when (@computer_three_unit_ship - @player_guesses).empty?
+      puts "THE 3 UNIT SHIP IS NOW SUNK!!!"
+    end
   end
   
   def hit_enter_to_end_turn
