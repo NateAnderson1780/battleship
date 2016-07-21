@@ -17,6 +17,7 @@ class Game
     @computer_three_unit_ship = computer_three_unit_ship
     @player_board             = Board.new 
     @computer_board           = Board.new
+    @game_has_ended           = false
   end
 
   def play_the_game
@@ -27,17 +28,19 @@ class Game
     # print some player instructions
     # get player guess
     # validate player guess
-    
-    puts "---------------------"
-    puts "YOU'RE UP!!!!"
-    puts @computer_board.table 
-    puts "Which position would you like to fire at?"
-    player_shot = gets.chomp
-    validate_coordinate(player_shot)
-    update_player_guesses(player_shot)
-    check_if_computer_hit(player_shot)
-    puts @computer_board.table 
-    hit_enter_to_end_turn("player")
+    while !@game_has_ended do
+      puts "---------------------"
+      puts "YOU'RE UP!!!!"
+      puts @computer_board.table 
+      puts "Which position would you like to fire at?"
+      player_shot = gets.chomp
+      validate_coordinate(player_shot)
+      update_player_guesses(player_shot)
+      check_if_computer_hit(player_shot)
+      break if @game_has_ended
+      puts @computer_board.table 
+      hit_enter_to_end_turn("player")
+    end
   end
   
   def computer_shot_sequence
@@ -117,7 +120,6 @@ class Game
       @player_board.update_rows(computer_shot.join, "M")
       puts @player_board.table
       hit_enter_to_end_turn("computer")
-      player_shot_sequence
     end  
   end
   
@@ -129,16 +131,13 @@ class Game
       puts "The computer sunk your 2 unit ship."
       puts @player_board.table
       hit_enter_to_end_turn("computer")
-      player_shot_sequence
     when (@player_three_unit_ship - @computer_guesses).empty?
       puts "The computer sunk your 3 unit ship."
       puts @player_board.table
       hit_enter_to_end_turn("computer")
-      player_shot_sequence
     else
       puts @player_board.table
       hit_enter_to_end_turn("computer")
-      player_shot_sequence
     end
   end
   
@@ -149,7 +148,6 @@ class Game
     if input == "" && computer_or_player == "player"
       computer_shot_sequence
     elsif input == "" && computer_or_player == "computer"
-      player_shot_sequence
     else  
       hit_enter_to_end_turn(computer_or_player)
     end
@@ -161,11 +159,13 @@ class Game
          "\nYOUUUUUUU ARE THE CHAAAAAAMPION, MY FRRRIIIEEND!!"\
          "\n------------------------------------------------"\
          "\nIt took you #{player_guesses.count} shots to win."
+    @game_has_ended = true
   end
   
   def end_game_sequence_computer_win
     puts "Wah wah, you lose"\
          "\n----------------"\
          "\nIt took the computer #{computer_guesses.count} shots to win." 
+    @game_has_ended = true
   end
 end
