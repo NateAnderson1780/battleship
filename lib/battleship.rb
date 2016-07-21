@@ -10,7 +10,13 @@ class Battleship
   ship_placement.start_game
   new_game = Game.new(ship_placement.computer_two_unit_ship, ship_placement.computer_three_unit_ship, ship_placement.player_two_unit_ship, ship_placement.player_three_unit_ship)
   new_game.play_the_game
+  
+  # def self.setup_new_game
+  #   SetupGame.new
+  # end
 end
+
+# Battleship.new()
 
 
 

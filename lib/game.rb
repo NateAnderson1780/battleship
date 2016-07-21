@@ -2,50 +2,64 @@ require './lib/board'
 require './lib/ship_placement'
 
 class Game
+  attr_reader :player_guesses,
+              :computer_guesses
+  
   def initialize(computer_two_unit_ship, computer_three_unit_ship, player_two_unit_ship, player_three_unit_ship)
     puts "LETS PLAY SOME BATTLESHIP!!!!"
-    @possible_coordinates     = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4", "C1", "C2", "C3", "C4", "D1", "D2", "D3", "D4"]
+    @player_coordinates       = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4", "C1", "C2", "C3", "C4", "D1", "D2", "D3", "D4"]
+    @computer_coordinates     = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4", "C1", "C2", "C3", "C4", "D1", "D2", "D3", "D4"]
     @player_guesses           = []
-    @computer_two_unit_ship   = computer_two_unit_ship
-    @computer_three_unit_ship = computer_three_unit_ship
+    @computer_guesses         = []
     @player_two_unit_ship     = player_two_unit_ship
     @player_three_unit_ship   = player_three_unit_ship
+    @computer_two_unit_ship   = computer_two_unit_ship
+    @computer_three_unit_ship = computer_three_unit_ship
     @player_board             = Board.new 
     @computer_board           = Board.new
   end
 
   def play_the_game
     player_shot_sequence
-    computer_shot_sequence
   end
   
   def player_shot_sequence
-    puts @player_board.table 
+    # print some player instructions
+    # get player guess
+    # validate player guess
+    
+    puts "---------------------"
+    puts "YOU'RE UP!!!!"
+    puts @computer_board.table 
     puts "Which position would you like to fire at?"
-    input = gets.chomp
-    validate_coordinate(input)
-    update_guesses(input)
-    check_if_computer_hit?(input)
-    hit_enter_to_end_turn
+    player_shot = gets.chomp
+    validate_coordinate(player_shot)
+    update_player_guesses(player_shot)
+    check_if_computer_hit(player_shot)
+    puts @computer_board.table 
+    hit_enter_to_end_turn("player")
   end
   
   def computer_shot_sequence
-    computer_shot = @possible_coordinates.sample 
+    computer_shot = @computer_coordinates.sample.split
+    @computer_coordinates -= computer_shot
+    update_computer_guesses(computer_shot)
+    check_if_player_hit(computer_shot)
   end
   
-  def validate_coordinate(input)
+  def validate_coordinate(player_shot)
     case 
-    when @possible_coordinates.include?(input)
-      validate_unique_guess(input)
+    when @player_coordinates.include?(player_shot)
+      validate_unique_guess(player_shot)
     else 
       puts "Please try again, that is not a valid coordinate."
       play_the_game
     end 
   end
   
-  def validate_unique_guess(input)
-    case input
-    when @player_guesses.include?(input)
+  def validate_unique_guess(player_shot)
+    case 
+    when @player_guesses.include?(player_shot)
       puts "Please try again, you have guessed that previously."
       play_the_game
     else
@@ -53,48 +67,105 @@ class Game
     end
   end
   
-  def update_guesses(input)
-    @player_guesses << input 
+  def update_player_guesses(player_shot)
+    @player_guesses << player_shot 
   end
   
-  def check_if_computer_hit?(input)
-    binding.pry
-    if @computer_two_unit_ship.include?(input) 
+  def update_computer_guesses(computer_shot)
+    @computer_guesses << computer_shot.join 
+  end
+  
+  def check_if_computer_hit(player_shot)
+    case 
+    when @computer_two_unit_ship.include?(player_shot) 
       puts "YOU HAVE HIT THE 2 UNIT SHIP!!"
-      # update_board(input, "H")
-      check_if_ship_sunk
-    elsif  @computer_three_unit_ship.include?(input)
+      @computer_board.update_rows(player_shot, "H")
+      check_if_computer_ship_sunk
+    when @computer_three_unit_ship.include?(player_shot)
       puts "YOU HAVE HIT THE 3 UNIT SHIP!!!"
-      # update_board(input, "H")
-      check_if_ship_sunk
+      @computer_board.update_rows(player_shot, "H")
+      check_if_computer_ship_sunk
     else
       puts "Bummer, that one's a miss."
-      # update_board(input, "M")
+      @computer_board.update_rows(player_shot, "M")
     end  
   end
   
-  def check_if_ship_sunk
+  def check_if_computer_ship_sunk
     case 
     when ((@computer_two_unit_ship + @computer_three_unit_ship) - @player_guesses).empty?
-      # enter END GAME SEQUENCE
+      end_game_sequence_player_win
     when (@computer_two_unit_ship - @player_guesses).empty?
-      puts "THE 2 UNIT SHIP IS NOW SUNK!!"
+      puts "2 UNIT SHIP IS SUNK"
     when (@computer_three_unit_ship - @player_guesses).empty?
-      puts "THE 3 UNIT SHIP IS NOW SUNK!!!"
+      puts "3 UNIT SHIP IS SUNK"
     end
   end
   
-  def hit_enter_to_end_turn
-    puts "Please hit enter to end your turn"
-    input = gets.chomp
-    if input == ""
-      true
+  def check_if_player_hit(computer_shot)
+    case 
+    when @player_two_unit_ship.include?(computer_shot.join) 
+      puts "The computer fired at position #{computer_shot.join} and hit your 2 unit ship :("
+      @player_board.update_rows(computer_shot.join, "H")
+      check_if_player_ship_sunk
+    when @player_three_unit_ship.include?(computer_shot.join)
+      puts "The computer fired at position #{computer_shot.join} and hit your 3 unit ship :("
+      @player_board.update_rows(computer_shot.join, "H")
+      check_if_player_ship_sunk
     else
-      hit_enter_to_end_turn
+      puts "THEY MISSED! IN YO FACE COMPUTER!"
+      @player_board.update_rows(computer_shot.join, "M")
+      puts @player_board.table
+      hit_enter_to_end_turn("computer")
+      player_shot_sequence
+    end  
+  end
+  
+  def check_if_player_ship_sunk
+    case 
+    when ((@player_two_unit_ship + @player_three_unit_ship) - @computer_guesses).empty?
+      end_game_sequence_computer_win
+    when (@player_two_unit_ship - @computer_guesses).empty?
+      puts "The computer sunk your 2 unit ship."
+      puts @player_board.table
+      hit_enter_to_end_turn("computer")
+      player_shot_sequence
+    when (@player_three_unit_ship - @computer_guesses).empty?
+      puts "The computer sunk your 3 unit ship."
+      puts @player_board.table
+      hit_enter_to_end_turn("computer")
+      player_shot_sequence
+    else
+      puts @player_board.table
+      hit_enter_to_end_turn("computer")
+      player_shot_sequence
     end
   end
   
-  def update_board(input)
-    
+  def hit_enter_to_end_turn(computer_or_player)
+    puts "Please hit enter to end turn"\
+         "\n---------------------------------"
+    input = gets.chomp
+    if input == "" && computer_or_player == "player"
+      computer_shot_sequence
+    elsif input == "" && computer_or_player == "computer"
+      player_shot_sequence
+    else  
+      hit_enter_to_end_turn(computer_or_player)
+    end
+  end
+  
+  def end_game_sequence_player_win
+    puts "-----------------------------------------------"\
+         "\nCONGRATS! YOU WIN BATTLESHIP!!!!"\
+         "\nYOUUUUUUU ARE THE CHAAAAAAMPION, MY FRRRIIIEEND!!"\
+         "\n------------------------------------------------"\
+         "\nIt took you #{player_guesses.count} shots to win."
+  end
+  
+  def end_game_sequence_computer_win
+    puts "Wah wah, you lose"\
+         "\n----------------"\
+         "\nIt took the computer #{computer_guesses.count} shots to win." 
   end
 end

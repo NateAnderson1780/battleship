@@ -5,6 +5,7 @@ class SetupGame
   end
   
   def welcome_message
+    # Message.welcome_message
     puts "Welcome to BATTLESHIP\n\nWould you like to (p)lay, read the (i)nstructions, or (q)uit?"
     input = gets.chomp 
     game_initiation(input)
